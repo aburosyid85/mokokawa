@@ -1292,8 +1292,32 @@
           <strong>MOKOKAWA 2.1 Web App</strong> • Kantor Pelayanan Perbendaharaan Negara (KPPN) Luwuk (053)
         </div>
         <div>
-          Arsitektur Serverless Google Apps Script &amp; Database RPD Terpadu
-          <div class="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed">
+          Arsitektur Serverless Cloud &amp; Database RPD Terpadu
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- END OF MAIN APP SHELL -->
+
+  <!-- TOAST NOTIFICATION BOX -->
+  <div id="toastBox" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-semibold no-print">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+    <span id="toastMessage">Notifikasi</span>
+  </div>
+
+  <!-- MODAL: KONEKTOR CODE.GS (TERSEMBUNYI SECARA DEFAULT & HANYA UNTUK PREVIEW CANVAS) -->
+  <div id="modalCodeGs" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="code-2" class="w-5 h-5 text-blue-400"></i>
+          <h3 class="font-extrabold text-sm sm:text-base">Konektor Backend Google Apps Script (Code.gs)</h3>
+        </div>
+        <button onclick="closeModal('modalCodeGs')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed">
         <p>
           Tempelkan fungsi-fungsi di bawah ini ke bagian <strong>paling bawah</strong> file <code class="bg-slate-100 px-1.5 py-0.5 rounded font-bold">Code.gs</code> Anda (tanpa menghapus kode yang sudah ada). Script ini sudah mendukung <strong>REST API JSON (doGet &amp; doPost)</strong> untuk dihubungkan ke <strong>Vercel</strong> sekaligus tetap mendukung Web App GAS:
         </p>
@@ -1462,7 +1486,7 @@ function prosesSaatFormDiSubmit(e) {
     // KONFIGURASI URL API GOOGLE APPS SCRIPT UNTUK VERCEL
     // Tempelkan URL Web App Google Apps Script Anda (berakhiran /exec) di bawah ini:
     // =========================================================================
-    const GAS_WEB_APP_API_URL = "https://script.google.com/macros/s/AKfycbzYrwr0S2Nr_XAVzOJB5Bg7kDyqy6UyI13PgVL_Mfpqq6NwXMmodtoXOaTdEl8WwFy78A/exec";
+    const GAS_WEB_APP_API_URL = "ISI_DENGAN_URL_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA";
 
     // Deteksi otomatis lingkungan eksekusi:
     // 1. Deployed di Google Apps Script
