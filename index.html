@@ -3835,7 +3835,7 @@ function prosesSaatFormDiSubmit(e) {
 
         const badge = document.getElementById('loginConnectionBadge');
         if (badge) {
-          badge.textContent = "Live Database RPD";
+          badge.textContent = "Live Database";
           badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-100 border border-emerald-300/40";
         }
       } else {
@@ -3872,7 +3872,7 @@ function prosesSaatFormDiSubmit(e) {
       // Prioritas 1: Jika dideploy di Vercel (dan GAS_WEB_APP_API_URL sudah diisi)
       if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
         const badge = document.getElementById('loginConnectionBadge');
-        if (badge) badge.textContent = "Menghubungkan Database...";
+        if (badge) badge.textContent = "Menghubungkan...";
 
         fetch(`${GAS_WEB_APP_API_URL}?action=getData`, { method: 'GET', redirect: 'follow' })
           .then(res => res.json())
