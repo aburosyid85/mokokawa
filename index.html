@@ -2122,7 +2122,7 @@ function prosesSaatFormDiSubmit(e) {
         APP_STATE.activeTab = 'deviasi_rpd';
         saveLoginSession();
         enterDashboardAfterLogin('deviasi_rpd');
-        showToast("Berhasil masuk dengan Level Akses KPPN (Full Access seluruh Satker).");
+        showToast("Berhasil masuk dengan Level Akses KPPN (Full Access).");
         return;
       }
 
@@ -2178,7 +2178,7 @@ function prosesSaatFormDiSubmit(e) {
           }
         });
       } else {
-        roleBadge.textContent = "LEVEL KPPN (FULL ACCESS)";
+        roleBadge.textContent = "LEVEL KPPN";
         roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200";
         // Only show Konektor GAS button in Preview Canvas, NEVER in deployed Web App / Vercel
         if (btnKonektor) {
