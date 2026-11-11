@@ -322,37 +322,37 @@
           </div>
         </div>
 
-        <!-- Navigation Tabs (Role-Aware) -->
-        <nav class="flex items-center gap-1 overflow-x-auto py-1.5 no-scrollbar border-t border-slate-100" id="mainNavTabs">
-          <button onclick="switchTab('deviasi_rpd')" data-tab="deviasi_rpd" data-role="ALL" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="info" class="w-3.5 h-3.5"></i> DEVIASI RPD
+        <!-- Navigation Tabs (Role-Aware - Fixed Fit Without Horizontal Scroll) -->
+        <nav class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100" id="mainNavTabs">
+          <button onclick="switchTab('deviasi_rpd')" data-tab="deviasi_rpd" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i> <span>DEVIASI RPD</span>
           </button>
-          <button onclick="switchTab('ikpa_satker')" data-tab="ikpa_satker" data-role="ALL" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="award" class="w-3.5 h-3.5"></i> IKPA_SATKER
+          <button onclick="switchTab('ikpa_satker')" data-tab="ikpa_satker" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="award" class="w-3.5 h-3.5 shrink-0"></i> <span>IKPA_SATKER</span>
           </button>
-          <button onclick="switchTab('deviasi_100jt')" data-tab="deviasi_100jt" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> DEVIASI &gt;100JT
+          <button onclick="switchTab('deviasi_100jt')" data-tab="deviasi_100jt" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5 shrink-0"></i> <span>DEVIASI &gt;100JT</span>
           </button>
-          <button onclick="switchTab('overspending')" data-tab="overspending" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> OVERSPENDING
+          <button onclick="switchTab('overspending')" data-tab="overspending" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="alert-octagon" class="w-3.5 h-3.5 shrink-0"></i> <span>OVERSPENDING</span>
           </button>
-          <button onclick="switchTab('tren_deviasi')" data-tab="tren_deviasi" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="activity" class="w-3.5 h-3.5"></i> TREN DEVIASI
+          <button onclick="switchTab('tren_deviasi')" data-tab="tren_deviasi" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="activity" class="w-3.5 h-3.5 shrink-0"></i> <span>TREN DEVIASI</span>
           </button>
-          <button onclick="switchTab('tren_ikpa')" data-tab="tren_ikpa" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="line-chart" class="w-3.5 h-3.5"></i> TREN IKPA
+          <button onclick="switchTab('tren_ikpa')" data-tab="tren_ikpa" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="line-chart" class="w-3.5 h-3.5 shrink-0"></i> <span>TREN IKPA</span>
           </button>
-          <button onclick="switchTab('master_rpd')" data-tab="master_rpd" data-role="ALL" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="database" class="w-3.5 h-3.5"></i> MASTER_RPD
+          <button onclick="switchTab('master_rpd')" data-tab="master_rpd" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="database" class="w-3.5 h-3.5 shrink-0"></i> <span>MASTER_RPD</span>
           </button>
-          <button onclick="switchTab('master_ikpa')" data-tab="master_ikpa" data-role="ALL" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="folder-kanban" class="w-3.5 h-3.5"></i> MASTER_IKPA
+          <button onclick="switchTab('master_ikpa')" data-tab="master_ikpa" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="folder-kanban" class="w-3.5 h-3.5 shrink-0"></i> <span>MASTER_IKPA</span>
           </button>
-          <button onclick="switchTab('relaksasi_ikpa')" data-tab="relaksasi_ikpa" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="sliders" class="w-3.5 h-3.5"></i> RELAKSASI IKPA
+          <button onclick="switchTab('relaksasi_ikpa')" data-tab="relaksasi_ikpa" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="sliders" class="w-3.5 h-3.5 shrink-0"></i> <span>RELAKSASI IKPA</span>
           </button>
-          <button onclick="switchTab('upload_data')" data-tab="upload_data" data-role="KPPN" class="nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition">
-            <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> UPLOAD DATA
+          <button onclick="switchTab('upload_data')" data-tab="upload_data" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition">
+            <i data-lucide="upload-cloud" class="w-3.5 h-3.5 shrink-0"></i> <span>UPLOAD DATA</span>
           </button>
         </nav>
       </div>
@@ -2842,9 +2842,9 @@ function prosesSaatFormDiSubmit(e) {
 
       document.querySelectorAll('.nav-tab').forEach(btn => {
         if (btn.dataset.tab === tabId) {
-          btn.className = "nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
         } else {
-          btn.className = "nav-tab flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
         }
       });
 
