@@ -1370,9 +1370,30 @@
             <!-- Left Column: Tutorial & Direct MyIntress Links (5 cols) -->
             <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-4 flex flex-col justify-between">
               <div class="space-y-3.5">
-                <div class="flex items-center gap-2 text-slate-900 font-extrabold text-sm border-b border-slate-200 pb-2.5">
+                <!-- Metode 1: Auto-Sync Tampermonkey (1-Click Trigger & Live Listener) -->
+                <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-2xl p-4 border border-sky-400/40 shadow-md space-y-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-sky-400 text-slate-950 uppercase">Metode 1 • Otomatis (Tampermonkey)</span>
+                    <span id="tampermonkeyLiveBadge" class="text-[10px] font-bold text-sky-300 flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Siap Menerima Sync
+                    </span>
+                  </div>
+                  <div class="text-xs font-extrabold text-sky-300">
+                    📊 Auto-Sync 2 File Hal III DIPA (Tanpa Upload Manual)
+                  </div>
+                  <p class="text-[11px] text-slate-200 leading-relaxed">
+                    Jika ekstensi <strong>Tampermonkey</strong> aktif di Chrome Anda, klik tombol di bawah untuk membuka MyIntress. Script akan otomatis memilih <strong>Triwulan IV</strong>, mengunduh 2 file Excel (<code>HAL3_DASHBOARD</code> &amp; <code>HAL3_DETAIL</code>), dan langsung mengirimkannya ke Spreadsheet!
+                  </p>
+                  <button type="button" onclick="launchMyIntressAutoSync()"
+                    class="w-full py-2.5 px-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs shadow transition flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>Buka MyIntress &amp; Jalankan Auto-Sync</span>
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-900 font-extrabold text-sm border-b border-slate-200 pb-2 pt-1">
                   <i data-lucide="book-open-check" class="w-4 h-4 text-blue-600"></i>
-                  <span>TUTORIAL PENGUNDUHAN DATA MYINTRESS</span>
+                  <span>METODE 2: TUTORIAL UPLOAD MANUAL</span>
                 </div>
 
                 <ol class="space-y-3 text-xs text-slate-700 leading-relaxed list-decimal list-inside font-medium">
@@ -1566,7 +1587,7 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify(res))
         .setMimeType(ContentService.MimeType.JSON);
     }
-    if (body && body.action === "uploadExcel") {
+    if (body && (body.action === "uploadExcel" || (body.files && Array.isArray(body.files)))) {
       var resUpload = uploadAndProcessExcelFiles(body.files);
       return ContentService.createTextOutput(JSON.stringify(resUpload))
         .setMimeType(ContentService.MimeType.JSON);
@@ -1579,7 +1600,7 @@ function doPost(e) {
   }
 }
 
-// Fungsi penerima upload file Excel langsung dari menu UPLOAD DATA di Aplikasi MOKOKAWA
+// Fungsi penerima upload file Excel (Mendukung Upload Manual Web App & Auto-Sync Tampermonkey)
 function uploadAndProcessExcelFiles(filesArray) {
   var excelFolderId = "1DkY1aMqEBxK_pRCYgjysy96wpa-cli5t";
   var folder = DriveApp.getFolderById(excelFolderId);
@@ -1591,10 +1612,24 @@ function uploadAndProcessExcelFiles(filesArray) {
 
   for (var i = 0; i < filesArray.length; i++) {
     var f = filesArray[i];
-    var bytes = Utilities.base64Decode(f.base64Data);
-    var blob = Utilities.newBlob(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", f.fileName);
+    // Dukung properti base64Data (dari Web App) maupun base64 (dari Tampermonkey)
+    var rawBase64 = f.base64Data || f.base64 || "";
+    if (!rawBase64) continue;
+
+    // Normalisasi nama file berdasarkan kode 'jenis' dari Tampermonkey agar 100% cocok dengan Aturan 1 & Aturan 2 di updateMasterSheetFromExcel()
+    var finalFileName = f.fileName || "Upload_Mokokawa.xlsx";
+    var jenisKode = String(f.jenis || "").toUpperCase();
+
+    if (jenisKode === "HAL3_DASHBOARD" && finalFileName.toUpperCase().indexOf("RPD") === -1) {
+      finalFileName = "RPD_" + finalFileName;
+    } else if (jenisKode === "HAL3_DETAIL" && finalFileName.toUpperCase().indexOf("DETAIL INDIKATOR HALAMAN 3 DIPA") === -1) {
+      finalFileName = "DETAIL INDIKATOR HALAMAN 3 DIPA_" + finalFileName;
+    }
+
+    var bytes = Utilities.base64Decode(rawBase64);
+    var blob = Utilities.newBlob(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", finalFileName);
     folder.createFile(blob);
-    savedNames.push(f.fileName);
+    savedNames.push(finalFileName);
   }
 
   // Langsung jalankan pemrosesan ke Master Database & hitung ulang IKPA Deviasi
@@ -1731,70 +1766,47 @@ function prosesSaatFormDiSubmit(e) {
 
     // =========================================================================
     // KONFIGURASI URL API GOOGLE APPS SCRIPT UNTUK VERCEL
-    // Tempelkan URL Web App Google Apps Script Anda (berakhiran /exec) di bawah ini:
     // =========================================================================
     const GAS_WEB_APP_API_URL = "https://script.google.com/macros/s/AKfycbzYrwr0S2Nr_XAVzOJB5Bg7kDyqy6UyI13PgVL_Mfpqq6NwXMmodtoXOaTdEl8WwFy78A/exec";
 
-    // Deteksi otomatis lingkungan eksekusi:
-    // 1. Deployed di Google Apps Script
     const IS_GAS_DEPLOYED = (typeof google !== 'undefined' && Boolean(google.script && google.script.run));
-    // 2. Deployed di Vercel (atau custom domain produksi di luar preview canvas)
     const IS_VERCEL_DEPLOYED = (
       window.location.hostname.includes('vercel.app') ||
-      (GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/'))
+      window.location.hostname.includes('kppn.online')
     );
-    // 3. Mode Produksi (GAS atau Vercel) -> Sembunyikan tombol simulasi & konektor GAS
     const IS_PRODUCTION_APP = IS_GAS_DEPLOYED || IS_VERCEL_DEPLOYED;
 
-    // Pending URL state from google.script.url (if running inside GAS iframe)
     let GAS_URL_SESSION = null;
 
-    // Global State
     let APP_STATE = {
       logUpdateRaw: "11/10/2026 10:16:39",
       logUpdateFormatted: "10 Nov 2026 10:16:39",
       printTimestampFormatted: "",
-      currentMonth: 11, // Default sesuai screenshot (11 - November)
+      currentMonth: 11,
       limitFutureMonths: true,
-      accessRole: null, // 'SATKER' or 'KPPN'
-      loggedInSatker: null, // 6-digit kode satker if role === 'SATKER'
+      accessRole: null,
+      loggedInSatker: null,
       selectedSatker: "528324",
       selectedPeriode: 11,
       activeTab: 'deviasi_rpd',
-      satkerList: [], // [{ kode, nama }]
+      satkerList: [],
       sheet1: [],
       ikpaDeviasi: [],
       ikpaKppn: [],
       pageRpd: 1,
       pageIkpa: 1,
-      // Granular Per-Month & Per-Belanja Relaxation Policy State
-      // Default Tahun Ini: Bulan Februari (2) & Maret (3) untuk Belanja 51 dan 52
       relaksasiConfig: {
         byMonth: {
-          1: [],
-          2: ['51', '52'],
-          3: ['51', '52'],
-          4: [],
-          5: [],
-          6: [],
-          7: [],
-          8: [],
-          9: [],
-          10: [],
-          11: [],
-          12: []
+          1: [], 2: ['51', '52'], 3: ['51', '52'], 4: [],
+          5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: []
         },
         capAt95To100: true
       },
-      // Table Sorting States
       sortOverspending: { col: 'nominalOver', dir: 'desc' },
       sortMasterRpd: { col: 'kode', dir: 'asc' },
       sortMasterIkpa: { col: 'kode', dir: 'asc' }
     };
 
-    // =========================================================================
-    // PERSISTENT STORAGE HELPERS (MULTI-LAYER SESSION & RELAKSASI CONFIG)
-    // =========================================================================
     function applyEnvironmentVisibility() {
       const demoBox = document.getElementById('previewOnlyDemoLoginBox');
       const btnGas = document.getElementById('btnKonektorGas');
@@ -1825,17 +1837,12 @@ function prosesSaatFormDiSubmit(e) {
     }
 
     function loadSavedRelaksasiFromStorage(serverConfig) {
-      // Priority 1: Config from Google Spreadsheet (tab Config_Relaksasi) so all Satker users receive KPPN's setting
       const normalizedServer = normalizeRelaksasiConfig(serverConfig);
       if (normalizedServer) {
         APP_STATE.relaksasiConfig = normalizedServer;
-        try {
-          localStorage.setItem(STORAGE_KEY_RELAKSASI, JSON.stringify(normalizedServer));
-        } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEY_RELAKSASI, JSON.stringify(normalizedServer)); } catch (e) {}
         return;
       }
-
-      // Priority 2: LocalStorage fallback (ensures persistence on page refresh in preview / browser)
       try {
         const raw = localStorage.getItem(STORAGE_KEY_RELAKSASI);
         if (raw) {
@@ -1847,13 +1854,10 @@ function prosesSaatFormDiSubmit(e) {
 
     function persistRelaksasiConfig(cfg, showNotification = false) {
       const normalized = normalizeRelaksasiConfig(cfg) || APP_STATE.relaksasiConfig;
-      try {
-        localStorage.setItem(STORAGE_KEY_RELAKSASI, JSON.stringify(normalized));
-      } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY_RELAKSASI, JSON.stringify(normalized)); } catch (e) {}
 
       const statusBadge = document.getElementById('badgeRelaksasiSyncStatus');
 
-      // Jalur 1: Jika di-deploy di Vercel & terhubung ke GAS_WEB_APP_API_URL via fetch POST
       if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
         if (statusBadge) {
           statusBadge.textContent = "Menyimpan ke database...";
@@ -1861,7 +1865,7 @@ function prosesSaatFormDiSubmit(e) {
         }
         fetch(GAS_WEB_APP_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain mencegah preflight CORS block pada Google Apps Script
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'saveRelaksasi', config: normalized })
         })
           .then(res => res.json())
@@ -1883,7 +1887,6 @@ function prosesSaatFormDiSubmit(e) {
         return;
       }
 
-      // Jalur 2: Jika berjalan langsung di Google Apps Script iframe
       if (IS_GAS_DEPLOYED) {
         if (statusBadge) {
           statusBadge.textContent = "Menyimpan ke database...";
@@ -1917,14 +1920,11 @@ function prosesSaatFormDiSubmit(e) {
       }
     }
 
-    // Multi-Layer Session Persistence (LocalStorage + SessionStorage + window.name + Cookie + GAS Parent URL History)
     function clearAllSessionStores() {
       try { localStorage.removeItem(STORAGE_KEY_SESSION); } catch (e) {}
       try { sessionStorage.removeItem(STORAGE_KEY_SESSION); } catch (e) {}
       try {
-        if (window.name && window.name.startsWith('MOKOKAWA_SESSION:')) {
-          window.name = '';
-        }
+        if (window.name && window.name.startsWith('MOKOKAWA_SESSION:')) window.name = '';
       } catch (e) {}
       try {
         document.cookie = `${STORAGE_KEY_SESSION}=; path=/; max-age=0; SameSite=Lax`;
@@ -1949,20 +1949,12 @@ function prosesSaatFormDiSubmit(e) {
         activeTab: APP_STATE.activeTab || 'deviasi_rpd'
       };
       const jsonStr = JSON.stringify(sessionPayload);
-
-      // 1. LocalStorage & SessionStorage
       try { localStorage.setItem(STORAGE_KEY_SESSION, jsonStr); } catch (e) {}
       try { sessionStorage.setItem(STORAGE_KEY_SESSION, jsonStr); } catch (e) {}
-
-      // 2. window.name (survives iframe reloads even when third-party cookies/storage are blocked)
       try { window.name = 'MOKOKAWA_SESSION:' + jsonStr; } catch (e) {}
-
-      // 3. First-party Cookie fallback
       try {
         document.cookie = `${STORAGE_KEY_SESSION}=${encodeURIComponent(jsonStr)}; path=/; max-age=86400; SameSite=Lax`;
       } catch (e) {}
-
-      // 4. Google Apps Script Parent URL History (survives full browser F5 refresh on script.google.com/macros/s/.../exec)
       try {
         if (typeof google !== 'undefined' && google.script && google.script.history) {
           google.script.history.replace(sessionPayload, sessionPayload, sessionPayload.activeTab);
@@ -1971,32 +1963,23 @@ function prosesSaatFormDiSubmit(e) {
     }
 
     function readRawSavedSession() {
-      // 1. Check GAS URL state first if populated
-      if (GAS_URL_SESSION && GAS_URL_SESSION.accessRole) {
-        return GAS_URL_SESSION;
-      }
-      // 2. Check localStorage
+      if (GAS_URL_SESSION && GAS_URL_SESSION.accessRole) return GAS_URL_SESSION;
       try {
         const ls = localStorage.getItem(STORAGE_KEY_SESSION);
         if (ls) return JSON.parse(ls);
       } catch (e) {}
-      // 3. Check sessionStorage
       try {
         const ss = sessionStorage.getItem(STORAGE_KEY_SESSION);
         if (ss) return JSON.parse(ss);
       } catch (e) {}
-      // 4. Check window.name
       try {
         if (window.name && window.name.startsWith('MOKOKAWA_SESSION:')) {
           return JSON.parse(window.name.replace('MOKOKAWA_SESSION:', ''));
         }
       } catch (e) {}
-      // 5. Check Cookie
       try {
         const match = document.cookie.split('; ').find(row => row.startsWith(STORAGE_KEY_SESSION + '='));
-        if (match) {
-          return JSON.parse(decodeURIComponent(match.split('=')[1]));
-        }
+        if (match) return JSON.parse(decodeURIComponent(match.split('=')[1]));
       } catch (e) {}
       return null;
     }
@@ -2031,7 +2014,6 @@ function prosesSaatFormDiSubmit(e) {
         }
         APP_STATE.activeTab = saved.activeTab || 'deviasi_rpd';
 
-        // Re-sync all storage layers
         saveLoginSession();
         enterDashboardAfterLogin(APP_STATE.activeTab);
         return true;
@@ -2059,9 +2041,6 @@ function prosesSaatFormDiSubmit(e) {
       12: { short: "Des", full: "12 - Desember", code: "12" }
     };
 
-    // =========================================================================
-    // CORE NUMERIC, DEVIASI CAP 100%, IKPA COLOR, & DYNAMIC RECALCULATION HELPERS
-    // =========================================================================
     function parseNum(val) {
       if (val === null || val === undefined || val === "") return 0;
       if (typeof val === "number") return isNaN(val) ? 0 : val;
@@ -2123,23 +2102,11 @@ function prosesSaatFormDiSubmit(e) {
     function getIkpaColorConfig(score) {
       const val = parseNum(score);
       if (val >= 95) {
-        return {
-          bg: 'bg-emerald-600 hover:bg-emerald-700',
-          hex: '#059669',
-          label: 'Sangat Baik'
-        };
+        return { bg: 'bg-emerald-600 hover:bg-emerald-700', hex: '#059669', label: 'Sangat Baik' };
       } else if (val >= 89) {
-        return {
-          bg: 'bg-blue-600 hover:bg-blue-700',
-          hex: '#2563eb',
-          label: 'Baik'
-        };
+        return { bg: 'bg-blue-600 hover:bg-blue-700', hex: '#2563eb', label: 'Baik' };
       } else {
-        return {
-          bg: 'bg-rose-600 hover:bg-rose-700',
-          hex: '#e11d48',
-          label: 'Kurang'
-        };
+        return { bg: 'bg-rose-600 hover:bg-rose-700', hex: '#e11d48', label: 'Kurang' };
       }
     }
 
@@ -2162,7 +2129,6 @@ function prosesSaatFormDiSubmit(e) {
       const byMonth = cfg.byMonth || {};
       const cap95 = cfg.capAt95To100 !== false;
 
-      // Group ikpaDeviasi rows by Kode Satker
       const bySatker = {};
       APP_STATE.ikpaDeviasi.forEach(row => {
         const kode = String(row["Kode Satker"]).padStart(6, '0');
@@ -2173,7 +2139,6 @@ function prosesSaatFormDiSubmit(e) {
       Object.keys(bySatker).forEach(kode => {
         const rows = bySatker[kode].sort((a, b) => parseInt(a["Periode"], 10) - parseInt(b["Periode"], 10));
 
-        // Find first active month where total pagu > 0
         let firstActiveM = 1;
         for (let i = 0; i < rows.length; i++) {
           const r = rows[i];
@@ -2281,21 +2246,17 @@ function prosesSaatFormDiSubmit(e) {
       showToast("Kode konektor Code.gs berhasil disalin ke clipboard!");
     }
 
-    // Universal Date Formatter: Converts "11/10/2026 10:16:39" or "2026-11-10 10:16:39" -> "10 Nov 2026 10:16:39"
     function formatUpdateTimestamp(rawStr) {
       if (!rawStr) return "-";
       const str = String(rawStr).trim();
       const shortMonths = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
 
-      // Pattern 1: MM/dd/yyyy HH:mm:ss or dd/MM/yyyy HH:mm:ss from Google Sheets
       const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(.*))?$/);
       if (slashMatch) {
         let p1 = parseInt(slashMatch[1], 10);
         let p2 = parseInt(slashMatch[2], 10);
         const year = slashMatch[3];
         const timePart = slashMatch[4] || "";
-
-        // Google Sheets US locale default is MM/dd/yyyy (e.g., 11/10/2026 -> 10 Nov 2026)
         let monthIdx, day;
         if (p1 <= 12 && p2 <= 31) {
           monthIdx = p1 - 1;
@@ -2308,7 +2269,6 @@ function prosesSaatFormDiSubmit(e) {
         return `${String(day).padStart(2, '0')} ${mName} ${year}${timePart ? ' ' + timePart : ''}`;
       }
 
-      // Pattern 2: yyyy-MM-dd HH:mm:ss (from Utilities.formatDate in Code.gs)
       const dashMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+(.*))?$/);
       if (dashMatch) {
         const year = dashMatch[1];
@@ -2322,7 +2282,6 @@ function prosesSaatFormDiSubmit(e) {
       return str;
     }
 
-    // Real-time Print Timestamp Generator (e.g. "11 Nov 2026 14:25:09 WITA")
     function generateCurrentPrintTimestamp() {
       const now = new Date();
       const shortMonths = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
@@ -2342,9 +2301,6 @@ function prosesSaatFormDiSubmit(e) {
       if (elFoot) elFoot.textContent = ts;
     }
 
-    // =========================================================================
-    // UNIFIED LOGIN & 2-LEVEL ACCESS CONTROL (SATKER vs KPPN)
-    // =========================================================================
     function quickLoginKppn() {
       const inp = document.getElementById('inputUnifiedLogin');
       if (inp) inp.value = 'KPPN053';
@@ -2362,7 +2318,6 @@ function prosesSaatFormDiSubmit(e) {
       const upperVal = rawVal.toUpperCase();
       const validKppnPins = ['KPPN053', '053', 'ADMIN', 'KPPN', 'LUWUK'];
 
-      // 1. Check if KPPN Level Access Code
       if (validKppnPins.includes(upperVal)) {
         APP_STATE.accessRole = 'KPPN';
         APP_STATE.loggedInSatker = null;
@@ -2373,7 +2328,6 @@ function prosesSaatFormDiSubmit(e) {
         return;
       }
 
-      // 2. Otherwise check if valid 6-digit Satker Code
       const paddedKode = rawVal.padStart(6, '0');
       const found = APP_STATE.sheet1.find(r => String(r["Kode Satker"]).padStart(6, '0') === paddedKode);
       if (found) {
@@ -2416,7 +2370,6 @@ function prosesSaatFormDiSubmit(e) {
         boxMasterRpdKode.classList.add('hidden');
         boxMasterIkpaKode.classList.add('hidden');
 
-        // Hide KPPN-only macro tabs
         document.querySelectorAll('.nav-tab').forEach(btn => {
           if (btn.dataset.role === 'KPPN') {
             btn.classList.add('hidden');
@@ -2427,7 +2380,6 @@ function prosesSaatFormDiSubmit(e) {
       } else {
         roleBadge.textContent = "LEVEL KPPN";
         roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200";
-        // Only show Konektor GAS button in Preview Canvas, NEVER in deployed Web App / Vercel
         if (btnKonektor) {
           if (IS_PRODUCTION_APP) {
             btnKonektor.classList.add('hidden');
@@ -2469,9 +2421,6 @@ function prosesSaatFormDiSubmit(e) {
       showToast("Anda telah keluar dari sesi akses.");
     }
 
-    // =========================================================================
-    // SEARCHABLE CUSTOM SATKER DROPDOWN IN DEVIASI RPD HEADER
-    // =========================================================================
     function toggleSatkerDropdown() {
       if (APP_STATE.accessRole === 'SATKER') return;
       const pop = document.getElementById('popoverSatkerDropdown');
@@ -2502,6 +2451,7 @@ function prosesSaatFormDiSubmit(e) {
     function filterSatkerDropdownList(query) {
       const q = (query || '').trim().toLowerCase();
       const container = document.getElementById('listSatkerDropdownItems');
+      if (!container) return;
       container.innerHTML = '';
 
       const matches = APP_STATE.satkerList.filter(item =>
@@ -2536,7 +2486,6 @@ function prosesSaatFormDiSubmit(e) {
       });
     }
 
-    // Searchable Custom Satker Dropdown in IKPA_SATKER Header
     function toggleSatkerDropdownIkpa() {
       if (APP_STATE.accessRole === 'SATKER') return;
       const pop = document.getElementById('popoverSatkerDropdownIkpa');
@@ -2606,21 +2555,13 @@ function prosesSaatFormDiSubmit(e) {
       });
     }
 
-    // Close custom dropdowns when clicking outside
     document.addEventListener('click', function(e) {
       const wrap = document.getElementById('satkerDropdownWrapper');
-      if (wrap && !wrap.contains(e.target)) {
-        closeSatkerDropdown();
-      }
+      if (wrap && !wrap.contains(e.target)) closeSatkerDropdown();
       const wrapIkpa = document.getElementById('ikpaSatkerSelectContainer');
-      if (wrapIkpa && !wrapIkpa.contains(e.target)) {
-        closeSatkerDropdownIkpa();
-      }
+      if (wrapIkpa && !wrapIkpa.contains(e.target)) closeSatkerDropdownIkpa();
     });
 
-    // =========================================================================
-    // REALISTIC MOCK DATA BUILDER (MATCHING KPPN LUWUK SCREENSHOTS)
-    // =========================================================================
     function buildMockDatabase() {
       const satkers = [
         { kode: "528324", nama: "KANTOR PELAYANAN PERBENDAHARAAN NEGARA LUWUK", tglRev: "13-07-2026", noRev: "10", p51: 15.77, p52: 84.23, p53: 0 },
@@ -2648,14 +2589,12 @@ function prosesSaatFormDiSubmit(e) {
           let r52 = 120000000, p52 = 112000000;
           let r53 = 0, p53 = 0;
 
-          // Exact values matching user's latest screenshots (528324 & 008039)
           if (sat.kode === "528324") {
             r51 = 10500000;
-            p51 = (m >= 9) ? 10001000 : 10500000; // Penyerapan - Rencana = -499,000
+            p51 = (m >= 9) ? 10001000 : 10500000;
             r52 = 54446631;
-            p52 = (m >= 9) ? 29238000 : 54446631; // Penyerapan - Rencana = -25,208,631 (46.3%)
+            p52 = (m >= 9) ? 29238000 : 54446631;
           } else if (sat.kode === "008039") {
-            // Includes overspending (Penyerapan > Rencana) in month 6, 7, 8, 9, 10, 11 for EWS verification
             const r51Arr = [0, 367005717, 366083288, 639614734, 362863070, 337449630, 418517670, 333605270, 334338684, 249880924, 205856775, 203403613, 203403613];
             const p51Arr = [0, 367005717, 366083289, 758986477, 354745718, 362863070, 737667376, 394560099, 431807110, 386950456, 382622088, 369158096, 369158096];
             const r52Arr = [0, 51743557, 241097162, 210489841, 112654786, 130925886, 111904786, 130453582, 122029136, 115788886, 98895903, 118908903, 118908903];
@@ -2665,7 +2604,6 @@ function prosesSaatFormDiSubmit(e) {
           } else if (sat.kode === "428811") {
             r51 = 283219383; p51 = 129181054;
             r52 = 732745466; p52 = m >= 9 ? 795000000 : 468000000;
-            r53 = 0; p53 = 0;
           } else if (sat.kode === "419264") {
             r51 = 5200000000; p51 = 800000000;
             r52 = 310000000; p52 = 295000000;
@@ -2673,7 +2611,7 @@ function prosesSaatFormDiSubmit(e) {
             r51 = 1800000000; p51 = 800000000;
             r52 = 210000000; p52 = 190000000;
           } else if (sat.kode === "647048") {
-            r51 = 1450000000; p51 = 1620000000; // Overspending > 5%
+            r51 = 1450000000; p51 = 1620000000;
             r52 = 2100000000; p52 = 800000000;
           } else if (sat.kode === "413864") {
             r51 = 420000000; p51 = 410000000;
@@ -2692,7 +2630,6 @@ function prosesSaatFormDiSubmit(e) {
             r52 = 613900000; p52 = 200000000;
           }
 
-          // Formula: Deviasi = Penyerapan - Rencana
           const dev51 = p51 - r51;
           const dev52 = p52 - r52;
           const dev53 = p53 - r53;
@@ -2700,7 +2637,6 @@ function prosesSaatFormDiSubmit(e) {
           const d51Obj = capDeviasi100(r51, p51);
           const d52Obj = capDeviasi100(r52, p52);
           const d53Obj = capDeviasi100(r53, p53);
-
           const perStr = String(m).padStart(2, '0');
 
           sheet1.push({
@@ -2796,9 +2732,6 @@ function prosesSaatFormDiSubmit(e) {
       };
     }
 
-    // =========================================================================
-    // INITIALIZATION & NAVIGATION
-    // =========================================================================
     function getMaxVisibleMonth() {
       return APP_STATE.limitFutureMonths ? APP_STATE.currentMonth : 12;
     }
@@ -2824,7 +2757,6 @@ function prosesSaatFormDiSubmit(e) {
     }
 
     function switchTab(tabId) {
-      // Enforce role access guard
       if (APP_STATE.accessRole === 'SATKER') {
         const kppnOnlyTabs = ['deviasi_100jt', 'overspending', 'tren_deviasi', 'tren_ikpa', 'relaksasi_ikpa', 'upload_data'];
         if (kppnOnlyTabs.includes(tabId)) {
@@ -2869,7 +2801,6 @@ function prosesSaatFormDiSubmit(e) {
 
       APP_STATE.satkerList = Array.from(satkerMap.entries()).map(([kode, nama]) => ({ kode, nama }));
 
-      // Do not render simulation chips when deployed in Google Apps Script or Vercel
       if (IS_PRODUCTION_APP) return;
 
       const chipContainer = document.getElementById('loginSatkerChips');
@@ -2895,7 +2826,6 @@ function prosesSaatFormDiSubmit(e) {
     function populateAllDropdowns() {
       const maxM = getMaxVisibleMonth();
 
-      // Update selected Satker label on both custom searchable dropdowns (DEVIASI RPD & IKPA_SATKER)
       const currentSatObj = APP_STATE.satkerList.find(s => s.kode === APP_STATE.selectedSatker);
       if (currentSatObj) {
         const textLabel = `${currentSatObj.kode} - ${currentSatObj.nama}`;
@@ -2907,7 +2837,6 @@ function prosesSaatFormDiSubmit(e) {
       filterSatkerDropdownList('');
       filterSatkerDropdownListIkpa('');
 
-      // Dynamic Period Dropdowns
       const periodSelectors = ['selectPeriodeRpd', 'selectPeriode100Jt', 'selectPeriodeOverspending'];
       periodSelectors.forEach(selId => {
         const sel = document.getElementById(selId);
@@ -2924,9 +2853,9 @@ function prosesSaatFormDiSubmit(e) {
         }
       });
 
-      // Master Table Month Filters
       ['filterMasterRpdBulan', 'filterMasterIkpaBulan'].forEach(selId => {
         const sel = document.getElementById(selId);
+        if (!sel) return;
         const prev = sel.value || 'ALL';
         sel.innerHTML = '<option value="ALL">Semua Bulan (s.d. Batas Bulan)</option>';
         for (let m = 1; m <= maxM; m++) {
@@ -2974,11 +2903,6 @@ function prosesSaatFormDiSubmit(e) {
       }, 100);
     }
 
-    // =========================================================================
-    // VIEW 1: DEVIASI RPD BULANAN
-    // Formula: Deviasi = Penyerapan - Rencana
-    // EWS Warning: ONLY when Penyerapan > Rencana AND % Deviasi > 5%
-    // =========================================================================
     function renderDeviasiRpdView() {
       const kode = APP_STATE.accessRole === 'SATKER' ? APP_STATE.loggedInSatker : APP_STATE.selectedSatker;
       const per = Number(APP_STATE.selectedPeriode);
@@ -3007,7 +2931,6 @@ function prosesSaatFormDiSubmit(e) {
       badge.textContent = score.toFixed(2);
       badge.className = `w-full py-2 px-4 rounded-lg text-white font-extrabold text-xl shadow-sm transition transform hover:scale-[1.02] text-center cursor-pointer ${colorCfg.bg}`;
 
-      // Belanja 51, 52, 53, 57
       const types = ['51', '52', '53', '57'];
       let hasOverspendingWarning = false;
       let overspendingDetails = [];
@@ -3015,9 +2938,6 @@ function prosesSaatFormDiSubmit(e) {
       types.forEach(t => {
         const ren = parseNum(rpdRow[`Rencana ${t}`]);
         const pen = parseNum(rpdRow[`Penyerapan ${t}`]);
-
-        // EXPLICIT FORMULA: Deviasi = Penyerapan - Rencana
-        // So if Rencana = 10,500,000 and Penyerapan = 10,001,000 -> Deviasi = -499,000
         const dev = pen - ren;
         const pctObj = capDeviasi100(ren, pen, rpdRow[`% Deviasi ${t}`]);
 
@@ -3030,7 +2950,6 @@ function prosesSaatFormDiSubmit(e) {
           ? `${pctObj.capped}% <span class="block text-[10px] font-normal text-rose-600">(Aktual: ${pctObj.raw}% &rarr; Maks 100%)</span>`
           : `${pctObj.capped}%`;
 
-        // EWS Rule: Only flag overspending when Penyerapan > Rencana AND % Deviasi > 5%
         const isOverspendingExceed5 = (pen > ren) && (pctObj.capped > 5);
 
         if (isOverspendingExceed5) {
@@ -3044,7 +2963,6 @@ function prosesSaatFormDiSubmit(e) {
         }
       });
 
-      // Role-Based EWS Validation Banner
       const banner = document.getElementById('ewsValidationBanner');
       const actorPhrase = APP_STATE.accessRole === 'KPPN'
         ? 'Petugas FO KPPN dapat melakukan asesmen pengajuan SPM.'
@@ -3081,9 +2999,6 @@ function prosesSaatFormDiSubmit(e) {
       lucide.createIcons();
     }
 
-    // =========================================================================
-    // VIEW 2: IKPA_SATKER (Monitoring Data IKPA Deviasi Hal III DIPA)
-    // =========================================================================
     function renderIkpaSatkerView() {
       const kode = APP_STATE.accessRole === 'SATKER' ? APP_STATE.loggedInSatker : APP_STATE.selectedSatker;
       const maxM = getMaxVisibleMonth();
@@ -3171,31 +3086,22 @@ function prosesSaatFormDiSubmit(e) {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: {
-              min: 0,
-              max: 105,
-              ticks: { stepSize: 20 }
-            }
+            y: { min: 0, max: 105, ticks: { stepSize: 20 } }
           }
         }
       });
     }
 
-    // =========================================================================
-    // VIEW 3: DEVIASI > 100 JUTA (ONLY UNDER-SPENDING: Rencana - Penyerapan > 100,000,000)
-    // =========================================================================
     function renderDeviasi100Jt() {
       const per = Number(document.getElementById('selectPeriode100Jt').value || APP_STATE.selectedPeriode);
       const rows = APP_STATE.sheet1.filter(r => parseInt(r["Periode"], 10) === per);
 
       ['51', '52', '53'].forEach(t => {
-        // Strictly filter where Penyerapan is BELOW Rencana by more than 100,000,000 (Rencana - Penyerapan > 100,000,000)
-        // Overspending (Penyerapan > Rencana) is excluded here and shown in OVERSPENDING menu
         const filtered = rows
           .map(r => {
             const ren = parseNum(r[`Rencana ${t}`]);
             const pen = parseNum(r[`Penyerapan ${t}`]);
-            const kurangSerap = ren - pen; // Positive when Penyerapan < Rencana
+            const kurangSerap = ren - pen;
             return {
               kode: String(r["Kode Satker"]).padStart(6, '0'),
               nama: r["Nama Satker"],
@@ -3209,6 +3115,7 @@ function prosesSaatFormDiSubmit(e) {
 
         const maxVal = filtered.length > 0 ? filtered[0].kurangSerap : 1;
         const tbody = document.getElementById(`tbody100Jt${t}`);
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         if (filtered.length === 0) {
@@ -3247,9 +3154,6 @@ function prosesSaatFormDiSubmit(e) {
       });
     }
 
-    // =========================================================================
-    // VIEW 4: OVERSPENDING & EWS (Filter Jenis Belanja + Sortable Columns)
-    // =========================================================================
     function toggleSortOverspending(col) {
       if (APP_STATE.sortOverspending.col === col) {
         APP_STATE.sortOverspending.dir = APP_STATE.sortOverspending.dir === 'asc' ? 'desc' : 'asc';
@@ -3275,7 +3179,7 @@ function prosesSaatFormDiSubmit(e) {
     }
 
     function renderOverspending() {
-      const per = Number(document.getElementById('selectPeriodeOverspending').value || APP_STATE.selectedPeriode);
+      const per = Number(document.getElementById('selectPeriodeOverspending')?.value || APP_STATE.selectedPeriode);
       const jenisFilter = document.getElementById('selectJenisBelanjaOverspending')?.value || 'ALL';
       const modeFilter = document.getElementById('selectModeOverspending')?.value || 'OVERSPENDING_ONLY';
 
@@ -3290,7 +3194,7 @@ function prosesSaatFormDiSubmit(e) {
         typesToCheck.forEach(t => {
           const ren = parseNum(r[`Rencana ${t}`]);
           const pen = parseNum(r[`Penyerapan ${t}`]);
-          const nominalOver = pen - ren; // Positive means Penyerapan > Rencana (Overspending)
+          const nominalOver = pen - ren;
           const pctObj = capDeviasi100(ren, pen, r[`% Deviasi ${t}`]);
           const isOver = nominalOver > 0;
           const isOverEws5 = isOver && pctObj.capped > 5;
@@ -3319,13 +3223,12 @@ function prosesSaatFormDiSubmit(e) {
 
       items.sort((a, b) => {
         let va = a[col], vb = b[col];
-        if (typeof va === 'string') {
-          return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
-        }
+        if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
         return dir === 'asc' ? (va - vb) : (vb - va);
       });
 
       const tbody = document.getElementById('tbodyOverspending');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       if (items.length === 0) {
@@ -3369,9 +3272,6 @@ function prosesSaatFormDiSubmit(e) {
       });
     }
 
-    // =========================================================================
-    // VIEW 5: TREN DEVIASI BELANJA PER BULAN
-    // =========================================================================
     function renderTrenDeviasiView() {
       const maxM = getMaxVisibleMonth();
       const rows = APP_STATE.ikpaKppn
@@ -3383,7 +3283,9 @@ function prosesSaatFormDiSubmit(e) {
       const data52 = rows.map(r => capDeviasi100(r["Rencana 52"], r["Penyerapan 52"], r["% Deviasi 52"]).capped);
       const data53 = rows.map(r => capDeviasi100(r["Rencana 53"], r["Penyerapan 53"], r["% Deviasi 53"]).capped);
 
-      const ctx = document.getElementById('chartTrenDeviasi').getContext('2d');
+      const canvas = document.getElementById('chartTrenDeviasi');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       if (chartTrenDeviasiInstance) chartTrenDeviasiInstance.destroy();
 
       chartTrenDeviasiInstance = new Chart(ctx, {
@@ -3421,11 +3323,7 @@ function prosesSaatFormDiSubmit(e) {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: {
-              min: 0,
-              max: 110,
-              ticks: { callback: v => v + '%' }
-            }
+            y: { min: 0, max: 110, ticks: { callback: v => v + '%' } }
           }
         }
       });
@@ -3460,9 +3358,6 @@ function prosesSaatFormDiSubmit(e) {
       }
     }
 
-    // =========================================================================
-    // VIEW 6: TREN IKPA KPPN
-    // =========================================================================
     function renderTrenIkpaKppnView() {
       const maxM = getMaxVisibleMonth();
       const rows = APP_STATE.ikpaKppn
@@ -3470,6 +3365,7 @@ function prosesSaatFormDiSubmit(e) {
         .sort((a, b) => parseInt(a["Periode"], 10) - parseInt(b["Periode"], 10));
 
       const tbody = document.getElementById('tbodyTrenIkpaKppn');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       rows.forEach(r => {
@@ -3489,7 +3385,9 @@ function prosesSaatFormDiSubmit(e) {
         tbody.appendChild(tr);
       });
 
-      const ctx = document.getElementById('chartTrenIkpaKppn').getContext('2d');
+      const canvas = document.getElementById('chartTrenIkpaKppn');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       if (chartTrenIkpaKppnInstance) chartTrenIkpaKppnInstance.destroy();
 
       const labels = rows.map(r => MONTH_NAMES[parseInt(r["Periode"], 10)].short);
@@ -3526,18 +3424,14 @@ function prosesSaatFormDiSubmit(e) {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            y: { min: 50, max: 100 }
-          }
+          scales: { y: { min: 50, max: 100 } }
         }
       });
     }
 
-    // =========================================================================
-    // VIEW 7 & 8: MASTER TABLES WITH ROLE LOCK & DIRECT PAGE JUMP
-    // =========================================================================
     function buildPaginationControls(containerId, currentPage, totalPages, onPageClick) {
       const container = document.getElementById(containerId);
+      if (!container) return;
       container.innerHTML = '';
 
       const createBtn = (label, page, isActive = false, disabled = false) => {
@@ -3581,8 +3475,8 @@ function prosesSaatFormDiSubmit(e) {
 
     function getFilteredMasterRpd() {
       const maxM = getMaxVisibleMonth();
-      const q = (document.getElementById('filterMasterRpdKode').value || '').trim().toLowerCase();
-      const b = document.getElementById('filterMasterRpdBulan').value || 'ALL';
+      const q = (document.getElementById('filterMasterRpdKode')?.value || '').trim().toLowerCase();
+      const b = document.getElementById('filterMasterRpdBulan')?.value || 'ALL';
 
       const list = APP_STATE.sheet1.filter(r => {
         const kode = String(r["Kode Satker"]).padStart(6, '0');
@@ -3655,17 +3549,20 @@ function prosesSaatFormDiSubmit(e) {
       const { col, dir } = APP_STATE.sortMasterRpd;
       updateSortHeaderIcons('sortIconRpd', ['kode', 'nama', 'periode', 'r51', 'p51', 'dev51', 'd51', 'r52', 'p52', 'dev52', 'd52', 'r53', 'p53', 'dev53', 'd53'], col, dir);
 
-      const perPage = parseInt(document.getElementById('rowsPerPageRpd').value || '10', 10);
+      const perPage = parseInt(document.getElementById('rowsPerPageRpd')?.value || '10', 10);
       const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
       if (APP_STATE.pageRpd > totalPages) APP_STATE.pageRpd = totalPages;
 
       const startIdx = (APP_STATE.pageRpd - 1) * perPage;
       const pageRows = filtered.slice(startIdx, startIdx + perPage);
 
-      document.getElementById('infoPaginationRpd').textContent =
-        `${filtered.length ? startIdx + 1 : 0} - ${Math.min(startIdx + perPage, filtered.length)} / ${filtered.length}`;
+      const infoEl = document.getElementById('infoPaginationRpd');
+      if (infoEl) {
+        infoEl.textContent = `${filtered.length ? startIdx + 1 : 0} - ${Math.min(startIdx + perPage, filtered.length)} / ${filtered.length}`;
+      }
 
       const tbody = document.getElementById('tbodyMasterRpd');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       pageRows.forEach((r, idx) => {
@@ -3719,8 +3616,8 @@ function prosesSaatFormDiSubmit(e) {
 
     function getFilteredMasterIkpa() {
       const maxM = getMaxVisibleMonth();
-      const q = (document.getElementById('filterMasterIkpaKode').value || '').trim().toLowerCase();
-      const b = document.getElementById('filterMasterIkpaBulan').value || 'ALL';
+      const q = (document.getElementById('filterMasterIkpaKode')?.value || '').trim().toLowerCase();
+      const b = document.getElementById('filterMasterIkpaBulan')?.value || 'ALL';
 
       const list = APP_STATE.ikpaDeviasi.filter(r => {
         const kode = String(r["Kode Satker"]).padStart(6, '0');
@@ -3786,9 +3683,50 @@ function prosesSaatFormDiSubmit(e) {
     }
 
     // =========================================================================
-    // VIEW 10: DIRECT EXCEL FILE UPLOADER (PENGGANTI GOOGLE FORM)
+    // VIEW 10: DIRECT EXCEL FILE UPLOADER (PENGGANTI GOOGLE FORM + TAMPERMONKEY)
     // =========================================================================
     let UPLOAD_QUEUE_FILES = [];
+
+    function launchMyIntressAutoSync() {
+      const targetUrl = "https://myintress.kemenkeu.go.id/layout/data-view/ikpaservice/indikatorHal3Dipa/dashboard?mokokawa_autosync=1";
+      window.open(targetUrl, "_blank");
+      showToast("Membuka MyIntress... Pastikan Tampermonkey aktif untuk memulai Auto-Sync 2 File.");
+    }
+
+    // Listener postMessage otomatis dari Tampermonkey (jika MyIntress dibuka dari tombol aplikasi ini)
+    window.addEventListener("message", function(event) {
+      const data = event.data;
+      if (data && data.type === "HAL3DIPA_TAMPERMONKEY_EXCEL") {
+        const badge = document.getElementById('tampermonkeyLiveBadge');
+        if (badge) {
+          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Menerima ${data.jenis}...`;
+        }
+        showToast(`Tampermonkey mengirim ${data.fileName} (${data.jenis}). Menyinkronkan tampilan...`);
+
+        // Refresh data dari Spreadsheet setelah jeda singkat agar Code.gs selesai memproses
+        setTimeout(() => {
+          if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
+            fetch(`${GAS_WEB_APP_API_URL}?action=getData`, { method: 'GET', redirect: 'follow' })
+              .then(res => res.json())
+              .then(payload => {
+                if (payload && payload.sheet1) {
+                  APP_STATE.logUpdateRaw = payload.logUpdate || APP_STATE.logUpdateRaw;
+                  APP_STATE.sheet1 = payload.sheet1;
+                  APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
+                  APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
+                  recalculateDynamicIkpa();
+                  refreshAllViews();
+                  if (badge) {
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Tersinkron (${data.jenis})`;
+                  }
+                  showToast(`Data ${data.jenis} dari Tampermonkey berhasil diperbarui di layar!`);
+                }
+              })
+              .catch(() => {});
+          }
+        }, 6500);
+      }
+    });
 
     function renderUploadDataView() {
       renderUploadQueueList();
