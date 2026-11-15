@@ -327,6 +327,7 @@
             </button>
           </div>
         </div>
+
         <!-- Navigation Tabs (Role-Aware - Fixed Fit Without Horizontal Scroll) -->
         <nav class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100" id="mainNavTabs">
           <button onclick="switchTab('deviasi_rpd')" data-tab="deviasi_rpd" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
@@ -431,7 +432,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Report Body -->
           <div class="p-5 sm:p-6 space-y-4 print-compact-body">
             <!-- Satker Identity & Clickable Nilai IKPA Scorecard -->
@@ -1128,35 +1129,37 @@
           </div>
 
           <div class="p-5 space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center gap-3">
-                <div id="boxFilterMasterIkpaKode" class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">KODE / NAMA &gt;</span>
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <div id="boxFilterMasterIkpaKode" class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm w-full sm:w-auto">
+                  <span class="text-xs font-bold text-slate-700 shrink-0">KODE / NAMA &gt;</span>
                   <input id="filterMasterIkpaKode" type="text" placeholder="Ketik kode/nama..." oninput="resetAndRenderMasterIkpa()"
-                    class="bg-transparent border-b border-slate-400 focus:border-blue-600 text-xs font-semibold text-slate-900 outline-none w-36 sm:w-44" />
+                    class="bg-transparent border-b border-slate-400 focus:border-blue-600 text-xs font-semibold text-slate-900 outline-none flex-1 sm:w-44" />
                 </div>
 
-                <div class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">BULAN &gt;</span>
+                <div class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm w-full sm:w-auto">
+                  <span class="text-xs font-bold text-slate-700 shrink-0">BULAN &gt;</span>
                   <select id="filterMasterIkpaBulan" onchange="resetAndRenderMasterIkpa()"
-                    class="bg-transparent border-b border-slate-400 text-xs font-bold text-slate-900 outline-none cursor-pointer">
+                    class="bg-transparent border-b border-slate-400 text-xs font-bold text-slate-900 outline-none cursor-pointer flex-1 sm:flex-initial min-w-0">
                     <option value="ALL">Semua Bulan</option>
                   </select>
                 </div>
+              </div>
 
+              <div class="flex items-center gap-2 w-full sm:w-auto">
                 <button type="button" onclick="resetMasterIkpaFiltersAndSort()"
-                  class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shadow-sm transition"
+                  class="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shadow-sm transition shrink-0"
                   title="Kembalikan filter dan urutan ke tampilan awal">
                   <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                   <span>Reset</span>
                 </button>
-              </div>
 
-              <button onclick="exportMasterIkpaCsv()"
-                class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                <span>Export ke Excel (CSV)</span>
-              </button>
+                <button onclick="exportMasterIkpaCsv()"
+                  class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition whitespace-nowrap">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0"></i>
+                  <span>Export ke Excel (CSV)</span>
+                </button>
+              </div>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200">
@@ -1389,7 +1392,7 @@
                     📊 Auto-Sync 2 File Hal III DIPA (Tanpa Upload Manual)
                   </div>
                   <p class="text-[11px] text-slate-200 leading-relaxed">
-                    Jika ekstensi <strong>Tampermonkey</strong> aktif di Chrome Anda, klik tombol di bawah untuk membuka MyIntress. Script akan otomatis memilih <strong>Triwulan IV</strong>, mengunduh 2 file Excel (<code>HAL3_DASHBOARD</code> &amp; <code>HAL3_DETAIL</code>), dan langsung mengirimkannya ke database!
+                    Jika ekstensi <strong>Tampermonkey</strong> aktif di Chrome Anda, klik tombol di bawah untuk membuka MyIntress. Script akan otomatis memilih <strong>Triwulan IV</strong>, mengunduh 2 file Excel (<code>HAL3_DASHBOARD</code> &amp; <code>HAL3_DETAIL</code>), dan langsung mengirimkannya ke Spreadsheet!
                   </p>
                   <button type="button" onclick="launchMyIntressAutoSync()"
                     class="w-full py-2.5 px-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs shadow transition flex items-center justify-center gap-2">
@@ -1534,7 +1537,7 @@
           <strong>MOKOKAWA 2.1 Web App</strong> • KPPN Luwuk (053)
         </div>
         <div>
-          ©aboo.aisha | v2.1.1 build 151126
+          ©aboo.aisha | v2.1.0 build 111126
         </div>
       </div>
     </footer>
@@ -2362,10 +2365,14 @@ function prosesSaatFormDiSubmit(e) {
       const ikpaSelectWrap = document.getElementById('ikpaSatkerSelectContainer');
       const boxMasterRpdKode = document.getElementById('boxFilterMasterRpdKode');
       const boxMasterIkpaKode = document.getElementById('boxFilterMasterIkpaKode');
+      const mainNav = document.getElementById('mainNavTabs');
 
       if (APP_STATE.accessRole === 'SATKER') {
         roleBadge.textContent = `SATKER: ${APP_STATE.loggedInSatker}`;
         roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+        if (mainNav) {
+          mainNav.className = "flex flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100";
+        }
         if (btnKonektor) {
           btnKonektor.classList.add('hidden');
           btnKonektor.classList.remove('flex');
@@ -2387,6 +2394,9 @@ function prosesSaatFormDiSubmit(e) {
       } else {
         roleBadge.textContent = "LEVEL KPPN";
         roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200";
+        if (mainNav) {
+          mainNav.className = "flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100";
+        }
         if (btnKonektor) {
           if (IS_PRODUCTION_APP) {
             btnKonektor.classList.add('hidden');
@@ -2781,9 +2791,9 @@ function prosesSaatFormDiSubmit(e) {
 
       document.querySelectorAll('.nav-tab').forEach(btn => {
         if (btn.dataset.tab === tabId) {
-          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
         } else {
-          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
         }
       });
 
@@ -3939,7 +3949,7 @@ function prosesSaatFormDiSubmit(e) {
             statusTitle.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i><span>Database Berhasil Diperbarui!</span>`;
           }
           if (statusDetail) {
-            statusDetail.innerHTML = `File <strong>${names}</strong> telah berhasil diproses ke Master Database dan seluruh tabel/grafik telah disinkronkan.`;
+            statusDetail.innerHTML = `File <strong>${names}</strong> telah berhasil diproses ke Master Spreadsheet dan seluruh tabel/grafik telah disinkronkan.`;
           }
           UPLOAD_QUEUE_FILES = [];
           renderUploadQueueList();
@@ -4273,7 +4283,7 @@ function prosesSaatFormDiSubmit(e) {
       const icon = document.getElementById('iconReloadDatabase');
       if (btn) btn.disabled = true;
       if (icon) icon.classList.add('animate-spin', 'text-blue-600');
-      showToast("Menarik data terbaru dari database...");
+      showToast("Menarik data terbaru dari database Spreadsheet...");
 
       const finishReload = (payload, isSuccess) => {
         if (btn) btn.disabled = false;
