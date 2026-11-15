@@ -1012,35 +1012,37 @@
           </div>
 
           <div class="p-5 space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center gap-3">
-                <div id="boxFilterMasterRpdKode" class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">KODE / NAMA &gt;</span>
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <div id="boxFilterMasterRpdKode" class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm w-full sm:w-auto">
+                  <span class="text-xs font-bold text-slate-700 shrink-0">KODE / NAMA &gt;</span>
                   <input id="filterMasterRpdKode" type="text" placeholder="Ketik kode/nama..." oninput="resetAndRenderMasterRpd()"
-                    class="bg-transparent border-b border-slate-400 focus:border-blue-600 text-xs font-semibold text-slate-900 outline-none w-36 sm:w-44" />
+                    class="bg-transparent border-b border-slate-400 focus:border-blue-600 text-xs font-semibold text-slate-900 outline-none flex-1 sm:w-44" />
                 </div>
 
-                <div class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">BULAN &gt;</span>
+                <div class="bg-[#f3f6d0] border border-amber-300 rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-sm w-full sm:w-auto">
+                  <span class="text-xs font-bold text-slate-700 shrink-0">BULAN &gt;</span>
                   <select id="filterMasterRpdBulan" onchange="resetAndRenderMasterRpd()"
-                    class="bg-transparent border-b border-slate-400 text-xs font-bold text-slate-900 outline-none cursor-pointer">
+                    class="bg-transparent border-b border-slate-400 text-xs font-bold text-slate-900 outline-none cursor-pointer flex-1 sm:flex-initial min-w-0">
                     <option value="ALL">Semua Bulan</option>
                   </select>
                 </div>
+              </div>
 
+              <div class="flex items-center gap-2 w-full sm:w-auto">
                 <button type="button" onclick="resetMasterRpdFiltersAndSort()"
-                  class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shadow-sm transition"
+                  class="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shadow-sm transition shrink-0"
                   title="Kembalikan filter dan urutan ke tampilan awal">
                   <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                   <span>Reset</span>
                 </button>
-              </div>
 
-              <button onclick="exportMasterRpdCsv()"
-                class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                <span>Export ke Excel (CSV)</span>
-              </button>
+                <button onclick="exportMasterRpdCsv()"
+                  class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition whitespace-nowrap">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0"></i>
+                  <span>Export ke Excel (CSV)</span>
+                </button>
+              </div>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200">
