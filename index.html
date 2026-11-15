@@ -117,6 +117,13 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
 
     /* Strict Single-Page A4 Portrait Print Styling for Laporan Deviasi RPD */
     .print-only {
@@ -363,7 +370,7 @@
         </nav>
       </div>
     </header>
-    
+
     <!-- MAIN CONTENT CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5">
 
@@ -944,7 +951,7 @@
               <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-[#ffd2c2] p-3.5 rounded-xl border border-rose-300 shadow-sm">
                   <div class="text-[11px] font-semibold text-slate-700">Rencana 53 Bulan Ini</div>
-                  <div class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5" Deviasi_51id="scRencana53">1,088,926,860</div>
+                  <div class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5" id="scRencana53">1,088,926,860</div>
                 </div>
                 <div class="bg-[#ffd2c2] p-3.5 rounded-xl border border-rose-300 shadow-sm">
                   <div class="text-[11px] font-semibold text-slate-700">Belanja 53 Bulan Ini</div>
@@ -2758,14 +2765,14 @@ function prosesSaatFormDiSubmit(e) {
       const btn = document.getElementById('btnFutureMonths');
       const label = document.getElementById('labelFutureMonths');
       if (APP_STATE.limitFutureMonths) {
-        btn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition";
+        btn.className = "flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shrink-0";
         label.textContent = `Batas Bulan: Aktif (Jan-${MONTH_NAMES[APP_STATE.currentMonth].short})`;
         if (APP_STATE.selectedPeriode > APP_STATE.currentMonth) {
           APP_STATE.selectedPeriode = APP_STATE.currentMonth;
         }
         showToast("Filter Batas_Bulan = YA aktif. Bulan masa depan disembunyikan.");
       } else {
-        btn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition";
+        btn.className = "flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition shrink-0";
         label.textContent = "Batas Bulan: Semua (Jan-Des)";
         showToast("Menampilkan seluruh periode (01 - Januari s.d. 12 - Desember).");
       }
@@ -4300,20 +4307,24 @@ function prosesSaatFormDiSubmit(e) {
         if (icon) icon.classList.remove('animate-spin', 'text-blue-600');
 
         if (isSuccess && payload && payload.sheet1 && payload.sheet1.length > 0) {
-          APP_STATE.logUpdateRaw = payload.logUpdate || APP_STATE.logUpdateRaw;
-          APP_STATE.currentMonth = Number(payload.currentMonth) || APP_STATE.currentMonth;
-          APP_STATE.sheet1 = payload.sheet1;
-          APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
-          APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
-          if (payload.relaksasiConfig) {
-            loadSavedRelaksasiFromStorage(payload.relaksasiConfig);
+          try {
+            APP_STATE.logUpdateRaw = payload.logUpdate || APP_STATE.logUpdateRaw;
+            APP_STATE.currentMonth = Number(payload.currentMonth) || APP_STATE.currentMonth;
+            APP_STATE.sheet1 = payload.sheet1;
+            APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
+            APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
+            if (payload.relaksasiConfig) {
+              loadSavedRelaksasiFromStorage(payload.relaksasiConfig);
+            }
+            recalculateDynamicIkpa();
+            populateLoginScreenChips();
+            populateAllDropdowns();
+            refreshAllViews();
+            if (APP_STATE.activeTab === 'relaksasi_ikpa') renderRelaksasiIkpaView();
+            lucide.createIcons();
+          } catch (uiErr) {
+            console.warn("UI render warning:", uiErr);
           }
-          recalculateDynamicIkpa();
-          populateLoginScreenChips();
-          populateAllDropdowns();
-          refreshAllViews();
-          if (APP_STATE.activeTab === 'relaksasi_ikpa') renderRelaksasiIkpaView();
-          lucide.createIcons();
           showToast(`Database berhasil diperbarui! (Update: ${APP_STATE.logUpdateFormatted})`);
         } else if (!IS_PRODUCTION_APP) {
           recalculateDynamicIkpa();
@@ -4327,9 +4338,9 @@ function prosesSaatFormDiSubmit(e) {
         }
       };
 
-      // Jalur 1: Jika dideploy di Vercel / Custom Domain (fetch ke GAS REST API dengan anti-cache timestamp)
+      // Jalur 1: Jika dideploy di Vercel / Custom Domain (fetch ke GAS REST API)
       if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
-        fetch(`${GAS_WEB_APP_API_URL}?action=getData&_t=${Date.now()}`, { method: 'GET', redirect: 'follow' })
+        fetch(`${GAS_WEB_APP_API_URL}?action=getData`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
           .then(res => res.json())
           .then(payload => finishReload(payload, true))
           .catch(() => finishReload(null, false));
