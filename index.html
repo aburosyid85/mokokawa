@@ -272,18 +272,18 @@
   <div id="appShell" class="hidden min-h-screen flex flex-col">
 
     <!-- TOP HEADER & NAVIGATION BAR -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6">
-        <div class="flex items-center justify-between h-16 gap-2">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print overflow-x-hidden">
+      <div class="max-w-7xl mx-auto px-2 sm:px-6">
+        <div class="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-2">
           <!-- Brand Logo -->
-          <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('deviasi_rpd')">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
-              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 cursor-pointer" onclick="switchTab('deviasi_rpd')">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900">MOKOKAWA <span class="text-blue-600">2.1</span></span>
-                <span id="activeRoleBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2 flex-nowrap">
+                <span class="font-extrabold text-sm sm:text-lg tracking-tight text-slate-900 whitespace-nowrap">MOKOKAWA <span class="text-blue-600">2.1</span></span>
+                <span id="activeRoleBadge" class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 whitespace-nowrap shrink-0">
                   LEVEL KPPN
                 </span>
               </div>
@@ -292,7 +292,7 @@
           </div>
 
           <!-- Right Status & Actions -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 sm:gap-2 shrink-0">
             <!-- Formatted Update Timestamp Pill (10 Nov 2026 10:16:39) -->
             <div class="hidden md:flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl text-xs text-slate-600 border border-slate-200">
               <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600"></i>
@@ -301,69 +301,69 @@
 
             <!-- Toggle Future Months -->
             <button onclick="toggleFutureMonths()" id="btnFutureMonths" title="Pengaturan Filter Batas Bulan Berjalan"
-              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+              class="flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shrink-0">
               <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
               <span class="hidden lg:inline" id="labelFutureMonths">Batas Bulan: Aktif</span>
             </button>
 
             <!-- Panduan Code.gs Modal Button (HANYA MUNCUL DI PREVIEW CANVAS, DISEMBUNYIKAN SAAT DEPLOYMENT) -->
             <button id="btnKonektorGas" onclick="openModal('modalCodeGs')"
-              class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700 transition shadow-sm">
+              class="hidden items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700 transition shadow-sm shrink-0">
               <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
               <span class="hidden sm:inline">Konektor GAS (Preview)</span>
             </button>
 
             <!-- Reload Database Button (Tarik Ulang Data Terbaru Tanpa Refresh Halaman) -->
             <button id="btnReloadDatabase" onclick="reloadDatabaseData()" title="Muat Ulang Database Terbaru"
-              class="w-8 h-8 rounded-full flex items-center justify-center bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition active:scale-95">
+              class="w-8 h-8 rounded-full flex items-center justify-center bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition active:scale-95 shrink-0">
               <i id="iconReloadDatabase" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
             </button>
 
             <!-- Logout / Ganti Akses Button -->
             <button onclick="handleLogout()" title="Keluar / Ganti Kode Akses"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              class="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition shrink-0">
+              <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
               <span>Logout</span>
             </button>
           </div>
         </div>
 
-        <!-- Navigation Tabs (Role-Aware - Fixed Fit Without Horizontal Scroll) -->
-        <nav class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100" id="mainNavTabs">
-          <button onclick="switchTab('deviasi_rpd')" data-tab="deviasi_rpd" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="info" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>DEVIASI RPD</span>
+        <!-- Navigation Tabs (Role-Aware - Fixed Fit Within Screen Width) -->
+        <nav class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100 w-full" id="mainNavTabs">
+          <button onclick="switchTab('deviasi_rpd')" data-tab="deviasi_rpd" data-role="ALL" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="info" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden xs:inline-block sm:inline-block"></i> <span class="truncate">DEVIASI RPD</span>
           </button>
-          <button onclick="switchTab('ikpa_satker')" data-tab="ikpa_satker" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="award" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>IKPA_SATKER</span>
+          <button onclick="switchTab('ikpa_satker')" data-tab="ikpa_satker" data-role="ALL" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="award" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden xs:inline-block sm:inline-block"></i> <span class="truncate">IKPA_SATKER</span>
           </button>
-          <button onclick="switchTab('deviasi_100jt')" data-tab="deviasi_100jt" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="trending-up" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>DEVIASI &gt;100JT</span>
+          <button onclick="switchTab('deviasi_100jt')" data-tab="deviasi_100jt" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="trending-up" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">DEVIASI &gt;100JT</span>
           </button>
-          <button onclick="switchTab('overspending')" data-tab="overspending" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="alert-octagon" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>OVERSPENDING</span>
+          <button onclick="switchTab('overspending')" data-tab="overspending" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="alert-octagon" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">OVERSPENDING</span>
           </button>
-          <button onclick="switchTab('tren_deviasi')" data-tab="tren_deviasi" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="activity" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>TREN DEVIASI</span>
+          <button onclick="switchTab('tren_deviasi')" data-tab="tren_deviasi" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="activity" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">TREN DEVIASI</span>
           </button>
-          <button onclick="switchTab('tren_ikpa')" data-tab="tren_ikpa" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="line-chart" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>TREN IKPA</span>
+          <button onclick="switchTab('tren_ikpa')" data-tab="tren_ikpa" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="line-chart" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">TREN IKPA</span>
           </button>
-          <button onclick="switchTab('master_rpd')" data-tab="master_rpd" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="database" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>MASTER_RPD</span>
+          <button onclick="switchTab('master_rpd')" data-tab="master_rpd" data-role="ALL" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="database" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden xs:inline-block sm:inline-block"></i> <span class="truncate">MASTER_RPD</span>
           </button>
-          <button onclick="switchTab('master_ikpa')" data-tab="master_ikpa" data-role="ALL" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="folder-kanban" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>MASTER_IKPA</span>
+          <button onclick="switchTab('master_ikpa')" data-tab="master_ikpa" data-role="ALL" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="folder-kanban" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden xs:inline-block sm:inline-block"></i> <span class="truncate">MASTER_IKPA</span>
           </button>
-          <button onclick="switchTab('relaksasi_ikpa')" data-tab="relaksasi_ikpa" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="sliders" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>RELAKSASI IKPA</span>
+          <button onclick="switchTab('relaksasi_ikpa')" data-tab="relaksasi_ikpa" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="sliders" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">RELAKSASI IKPA</span>
           </button>
-          <button onclick="switchTab('upload_data')" data-tab="upload_data" data-role="KPPN" class="nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition">
-            <i data-lucide="upload-cloud" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"></i> <span>UPLOAD DATA</span>
+          <button onclick="switchTab('upload_data')" data-tab="upload_data" data-role="KPPN" class="nav-tab min-w-0 flex-1 flex items-center justify-center gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition">
+            <i data-lucide="upload-cloud" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 hidden sm:inline-block"></i> <span class="truncate">UPLOAD DATA</span>
           </button>
         </nav>
       </div>
     </header>
-
+    
     <!-- MAIN CONTENT CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5">
 
@@ -2369,9 +2369,9 @@ function prosesSaatFormDiSubmit(e) {
 
       if (APP_STATE.accessRole === 'SATKER') {
         roleBadge.textContent = `SATKER: ${APP_STATE.loggedInSatker}`;
-        roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+        roleBadge.className = "text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap shrink-0";
         if (mainNav) {
-          mainNav.className = "flex flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100";
+          mainNav.className = "grid grid-cols-4 items-center gap-1 py-1.5 border-t border-slate-100 w-full";
         }
         if (btnKonektor) {
           btnKonektor.classList.add('hidden');
@@ -2393,9 +2393,9 @@ function prosesSaatFormDiSubmit(e) {
         });
       } else {
         roleBadge.textContent = "LEVEL KPPN";
-        roleBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200";
+        roleBadge.className = "text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 whitespace-nowrap shrink-0";
         if (mainNav) {
-          mainNav.className = "flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100";
+          mainNav.className = "flex flex-wrap lg:flex-nowrap items-center justify-between gap-1 py-1.5 border-t border-slate-100 w-full";
         }
         if (btnKonektor) {
           if (IS_PRODUCTION_APP) {
@@ -2791,9 +2791,9 @@ function prosesSaatFormDiSubmit(e) {
 
       document.querySelectorAll('.nav-tab').forEach(btn => {
         if (btn.dataset.tab === tabId) {
-          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab min-w-0 w-full flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-bold tracking-tight whitespace-nowrap transition bg-blue-600 text-white shadow-sm " + (btn.classList.contains('hidden') ? 'hidden' : '');
         } else {
-          btn.className = "nav-tab flex-1 flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
+          btn.className = "nav-tab min-w-0 w-full flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-1.5 rounded-lg text-[9.5px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap transition text-slate-600 hover:bg-slate-100 hover:text-slate-900 " + (btn.classList.contains('hidden') ? 'hidden' : '');
         }
       });
 
