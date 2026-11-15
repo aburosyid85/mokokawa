@@ -1399,7 +1399,7 @@
                     📊 Auto-Sync 2 File Hal III DIPA (Tanpa Upload Manual)
                   </div>
                   <p class="text-[11px] text-slate-200 leading-relaxed">
-                    Jika ekstensi <strong>Tampermonkey</strong> aktif di Chrome Anda, klik tombol di bawah untuk membuka MyIntress. Script akan otomatis memilih <strong>Triwulan IV</strong>, mengunduh 2 file Excel (<code>HAL3_DASHBOARD</code> &amp; <code>HAL3_DETAIL</code>), dan langsung mengirimkannya ke Spreadsheet!
+                    Jika ekstensi <strong>Tampermonkey</strong> aktif di Chrome Anda, klik tombol di bawah untuk membuka MyIntress. Script akan otomatis memilih <strong>Triwulan IV</strong>, mengunduh 2 file Excel (<code>HAL3_DASHBOARD</code> &amp; <code>HAL3_DETAIL</code>), dan langsung mengirimkannya ke database!
                   </p>
                   <button type="button" onclick="launchMyIntressAutoSync()"
                     class="w-full py-2.5 px-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs shadow transition flex items-center justify-center gap-2">
@@ -3966,7 +3966,7 @@ function prosesSaatFormDiSubmit(e) {
             statusTitle.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i><span>Database Berhasil Diperbarui!</span>`;
           }
           if (statusDetail) {
-            statusDetail.innerHTML = `File <strong>${names}</strong> telah berhasil diproses ke Master Spreadsheet dan seluruh tabel/grafik telah disinkronkan.`;
+            statusDetail.innerHTML = `File <strong>${names}</strong> telah berhasil diproses ke Master Database dan seluruh tabel/grafik telah disinkronkan.`;
           }
           UPLOAD_QUEUE_FILES = [];
           renderUploadQueueList();
@@ -4300,7 +4300,7 @@ function prosesSaatFormDiSubmit(e) {
       const icon = document.getElementById('iconReloadDatabase');
       if (btn) btn.disabled = true;
       if (icon) icon.classList.add('animate-spin', 'text-blue-600');
-      showToast("Menarik data terbaru dari database Spreadsheet...");
+      showToast("Menarik data terbaru dari database...");
 
       const finishReload = (payload, isSuccess) => {
         if (btn) btn.disabled = false;
