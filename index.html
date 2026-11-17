@@ -3733,32 +3733,51 @@ function prosesSaatFormDiSubmit(e) {
       if (data && data.type === "HAL3DIPA_TAMPERMONKEY_EXCEL") {
         const badge = document.getElementById('tampermonkeyLiveBadge');
         if (badge) {
-          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Menerima ${data.jenis}...`;
+          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block mr-1"></span> Mengolah ${data.jenis}...`;
         }
-        showToast(`Tampermonkey mengirim ${data.fileName} (${data.jenis}). Menyinkronkan tampilan...`);
+        showToast(`Tampermonkey mengirim ${data.fileName} (${data.jenis}). Menunggu server Google memproses...`);
 
-        // Refresh data dari Spreadsheet setelah jeda singkat agar Code.gs selesai memproses
-        setTimeout(() => {
-          if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
-            fetch(`${GAS_WEB_APP_API_URL}?action=getData`, { method: 'GET', redirect: 'follow' })
+        // Smart-Retry: Cek update timestamp ringan tiap 5 detik (maks 6 kali / 30 detik)
+        if (!IS_GAS_DEPLOYED && GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) {
+          let attempts = 0;
+          const oldTimestamp = APP_STATE.logUpdateRaw;
+          
+          const checkInterval = setInterval(() => {
+            attempts++;
+            fetch(`${GAS_WEB_APP_API_URL}?action=checkUpdate&_t=${Date.now()}`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
               .then(res => res.json())
-              .then(payload => {
-                if (payload && payload.sheet1) {
-                  APP_STATE.logUpdateRaw = payload.logUpdate || APP_STATE.logUpdateRaw;
-                  APP_STATE.sheet1 = payload.sheet1;
-                  APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
-                  APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
-                  recalculateDynamicIkpa();
-                  refreshAllViews();
-                  if (badge) {
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Tersinkron (${data.jenis})`;
-                  }
-                  showToast(`Data ${data.jenis} dari Tampermonkey berhasil diperbarui di layar!`);
+              .then(resData => {
+                // Jika timestamp di server sudah berubah (Code.gs selesai bekerja) ATAU percobaan sudah habis
+                if ((resData && resData.logUpdate && resData.logUpdate !== "-" && resData.logUpdate !== oldTimestamp) || attempts >= 6) {
+                  clearInterval(checkInterval);
+                  
+                  // Tarik ulang seluruh data penuh
+                  fetch(`${GAS_WEB_APP_API_URL}?action=getData&_t=${Date.now()}`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
+                    .then(res => res.json())
+                    .then(payload => {
+                      if (payload && payload.sheet1) {
+                        try {
+                          APP_STATE.logUpdateRaw = payload.logUpdate || APP_STATE.logUpdateRaw;
+                          APP_STATE.sheet1 = payload.sheet1;
+                          APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
+                          APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
+                          recalculateDynamicIkpa();
+                          refreshAllViews();
+                          if (badge) {
+                            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span> Tersinkron (${data.jenis})`;
+                          }
+                        } catch(e) {}
+                        showToast(`Data ${data.jenis} dari Tampermonkey berhasil diperbarui di layar!`);
+                      }
+                    })
+                    .catch(() => {});
                 }
               })
-              .catch(() => {});
-          }
-        }, 6500);
+              .catch(() => {
+                if (attempts >= 6) clearInterval(checkInterval);
+              });
+          }, 5000); // Cek setiap 5 detik
+        }
       }
     });
 
