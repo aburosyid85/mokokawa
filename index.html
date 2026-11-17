@@ -4417,7 +4417,32 @@ function prosesSaatFormDiSubmit(e) {
       // Restore login session automatically if user was already logged in before refresh
       restoreLoginSessionIfAvailable();
 
+      // Mulai pendeteksi update otomatis latar belakang (Auto-Polling)
+      startAutoUpdatePolling();
+
       lucide.createIcons();
+    }
+
+    // Fungsi Pengecek Database Otomatis (Berjalan Diam-diam di Latar Belakang Setiap 45 Detik)
+    function startAutoUpdatePolling() {
+      if (window._autoUpdateInterval) clearInterval(window._autoUpdateInterval);
+      if (IS_GAS_DEPLOYED || !GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) return;
+
+      window._autoUpdateInterval = setInterval(() => {
+        fetch(`${GAS_WEB_APP_API_URL}?action=checkUpdate&_t=${Date.now()}`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.logUpdate && data.logUpdate !== "-" && data.logUpdate !== APP_STATE.logUpdateRaw) {
+              const badge = document.getElementById('loginConnectionBadge');
+              if (badge) {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block mr-1"></span> Update Terdeteksi...`;
+              }
+              showToast("Pembaruan database otomatis terdeteksi! Menyinkronkan data...");
+              reloadDatabaseData(); // Tarik & render ulang data otomatis
+            }
+          })
+          .catch(() => { /* Abaikan jika error jaringan sesaat */ });
+      }, 45000); // Mengecek setiap 45 detik
     }
 
     // Boot Application on Window Load
