@@ -4436,32 +4436,80 @@ function prosesSaatFormDiSubmit(e) {
       // Restore login session automatically if user was already logged in before refresh
       restoreLoginSessionIfAvailable();
 
-      // Mulai pendeteksi update otomatis latar belakang (Auto-Polling)
-      startAutoUpdatePolling();
+      // Jalankan deteksi otomatis perubahan Log_Update tanpa perlu klik tombol manual
+      startAutoSyncLogUpdateWatcher();
 
       lucide.createIcons();
     }
 
-    // Fungsi Pengecek Database Otomatis (Berjalan Diam-diam di Latar Belakang Setiap 45 Detik)
-    function startAutoUpdatePolling() {
-      if (window._autoUpdateInterval) clearInterval(window._autoUpdateInterval);
-      if (IS_GAS_DEPLOYED || !GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) return;
-
-      window._autoUpdateInterval = setInterval(() => {
-        fetch(`${GAS_WEB_APP_API_URL}?action=checkUpdate&_t=${Date.now()}`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
-          .then(res => res.json())
-          .then(data => {
-            if (data && data.logUpdate && data.logUpdate !== "-" && data.logUpdate !== APP_STATE.logUpdateRaw) {
-              const badge = document.getElementById('loginConnectionBadge');
-              if (badge) {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block mr-1"></span> Update Terdeteksi...`;
-              }
-              showToast("Pembaruan database otomatis terdeteksi! Menyinkronkan data...");
-              reloadDatabaseData(); // Tarik & render ulang data otomatis
+    // Fungsi Pendeteksi Otomatis Perubahan Log_Update (Tanpa Perlu Ubah Code.gs)
+    let _isCheckingAutoSync = false;
+    function checkAndSyncIfLogUpdated() {
+      if (_isCheckingAutoSync) return;
+      if (IS_GAS_DEPLOYED) {
+        _isCheckingAutoSync = true;
+        google.script.run
+          .withSuccessHandler(payload => {
+            _isCheckingAutoSync = false;
+            if (payload && payload.logUpdate && payload.logUpdate !== "-" && payload.logUpdate !== APP_STATE.logUpdateRaw) {
+              reloadDatabaseData();
             }
           })
-          .catch(() => { /* Abaikan jika error jaringan sesaat */ });
-      }, 45000); // Mengecek setiap 45 detik
+          .withFailureHandler(() => { _isCheckingAutoSync = false; })
+          .getMokokawaData();
+        return;
+      }
+
+      if (!GAS_WEB_APP_API_URL.startsWith('https://script.google.com/macros/s/')) return;
+      _isCheckingAutoSync = true;
+
+      fetch(`${GAS_WEB_APP_API_URL}?action=getData`, { method: 'GET', redirect: 'follow', cache: 'no-store' })
+        .then(res => res.json())
+        .then(payload => {
+          _isCheckingAutoSync = false;
+          if (payload && payload.logUpdate && payload.logUpdate !== "-" && payload.logUpdate !== APP_STATE.logUpdateRaw) {
+            try {
+              APP_STATE.logUpdateRaw = payload.logUpdate;
+              APP_STATE.currentMonth = Number(payload.currentMonth) || APP_STATE.currentMonth;
+              APP_STATE.sheet1 = payload.sheet1 || APP_STATE.sheet1;
+              APP_STATE.ikpaDeviasi = payload.ikpaDeviasi || APP_STATE.ikpaDeviasi;
+              APP_STATE.ikpaKppn = payload.ikpaKppn || APP_STATE.ikpaKppn;
+              if (payload.relaksasiConfig) {
+                loadSavedRelaksasiFromStorage(payload.relaksasiConfig);
+              }
+              recalculateDynamicIkpa();
+              populateLoginScreenChips();
+              populateAllDropdowns();
+              refreshAllViews();
+              if (APP_STATE.activeTab === 'relaksasi_ikpa') renderRelaksasiIkpaView();
+              lucide.createIcons();
+              showToast(`Database otomatis diperbarui! (Update: ${APP_STATE.logUpdateFormatted})`);
+            } catch (e) {
+              console.warn("Auto-sync UI error:", e);
+            }
+          }
+        })
+        .catch(() => {
+          _isCheckingAutoSync = false;
+        });
+    }
+
+    function startAutoSyncLogUpdateWatcher() {
+      if (window._mokokawaAutoSyncTimer) clearInterval(window._mokokawaAutoSyncTimer);
+
+      // 1. Cek otomatis setiap 25 detik di latar belakang
+      window._mokokawaAutoSyncTimer = setInterval(checkAndSyncIfLogUpdated, 25000);
+
+      // 2. Cek otomatis begitu pengguna berpindah kembali ke tab aplikasi MOKOKAWA
+      if (!window._mokokawaFocusListenerBound) {
+        window._mokokawaFocusListenerBound = true;
+        window.addEventListener('focus', checkAndSyncIfLogUpdated);
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible') {
+            checkAndSyncIfLogUpdated();
+          }
+        });
+      }
     }
 
     // Boot Application on Window Load
